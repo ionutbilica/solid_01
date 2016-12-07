@@ -1,5 +1,7 @@
 package com.luxoft.training.solid.store;
 
+import com.luxoft.training.solid.store.persistence.CartsRepo;
+import com.luxoft.training.solid.store.persistence.Stock;
 import com.luxoft.training.solid.store.receipt.Receipt;
 import com.luxoft.training.solid.store.receipt.ReceiptFactory;
 
@@ -29,26 +31,26 @@ public class Store implements Sales {
 
     @Override
     public void addProductToCart(String name, int count, int cartId) {
-        Cart cart = cartsRepo.getCart(cartId);
-        Product product = stock.takeProduct(name, count);
+        Cart cart = Cart.load(cartId, cartsRepo);
+        Product product = new Product(stock.takeProduct(name, count));
         cart.addProduct(product);
     }
 
     @Override
     public double getCartTotal(int cartId) {
-        Cart cart = cartsRepo.getCart(cartId);
+        Cart cart = Cart.load(cartId, cartsRepo);
         return cart.getTotalPrice();
     }
 
     @Override
     public void addDeliveryToCart(int cartId) {
-        Cart cart = cartsRepo.getCart(cartId);
+        Cart cart = Cart.load(cartId, cartsRepo);
         cart.addDelivery();
     }
 
     @Override
     public String pay(int cartId, String receiptFormat) {
-        Cart cart = cartsRepo.getCart(cartId);
+        Cart cart = Cart.load(cartId, cartsRepo);
         double moneyFromTheClient = cart.getTotalPrice();
         cash += moneyFromTheClient;
         Receipt receipt = receiptFactory.createReceipt(receiptFormat);
