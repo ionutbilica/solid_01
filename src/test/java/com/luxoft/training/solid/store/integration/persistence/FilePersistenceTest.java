@@ -2,6 +2,8 @@ package com.luxoft.training.solid.store.integration.persistence;
 
 import com.luxoft.training.solid.store.Cart;
 import com.luxoft.training.solid.store.Product;
+import com.luxoft.training.solid.store.discount.NoDiscount;
+import com.luxoft.training.solid.store.discount.NoDiscountsRepo;
 import com.luxoft.training.solid.store.idgen.MockIdGenerator;
 import com.luxoft.training.solid.store.persistence.CartsRepo;
 import com.luxoft.training.solid.store.persistence.NotEnoughInStockException;
@@ -27,18 +29,19 @@ public class FilePersistenceTest {
     public void testOneProduct() throws Exception {
         ProductsRepo productsRepo = new FileProductsRepo();
         CartsRepo cartsRepo = new FileCartsRepo(new MockIdGenerator(1));
+        NoDiscountsRepo noDiscountsRepo = new NoDiscountsRepo();
 
         productsRepo.addProduct("wine", 100, 25);
-        Product wineInCart = new Product(productsRepo.takeProduct("wine", 10));
+        Product wineInCart = new Product(productsRepo.takeProduct("wine", 10), new NoDiscount());
 
         int newCartId = cartsRepo.createNewCart();
 
-        Cart cartSaved = Cart.load(newCartId, cartsRepo);
+        Cart cartSaved = Cart.load(newCartId, cartsRepo, noDiscountsRepo);
         cartSaved.addDelivery();
         cartSaved.addProduct(wineInCart);
 
         CartsRepo cartsRepoNewInst = new FileCartsRepo(new MockIdGenerator(1));
-        Cart cartLoaded = Cart.load(newCartId, cartsRepoNewInst);
+        Cart cartLoaded = Cart.load(newCartId, cartsRepoNewInst, noDiscountsRepo);
 
         Assert.assertEquals(cartSaved, cartLoaded);
     }

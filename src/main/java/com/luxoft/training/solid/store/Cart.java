@@ -1,5 +1,6 @@
 package com.luxoft.training.solid.store;
 
+import com.luxoft.training.solid.store.discount.DiscountsRepo;
 import com.luxoft.training.solid.store.persistence.CartData;
 import com.luxoft.training.solid.store.persistence.CartsRepo;
 import com.luxoft.training.solid.store.persistence.ProductData;
@@ -18,14 +19,14 @@ public class Cart {
     private List<Product> products;
     private boolean hasDelivery;
 
-    public static Cart load(int id, CartsRepo cartsRepo) {
+    public static Cart load(int id, CartsRepo cartsRepo, DiscountsRepo discountsRepo) {
         CartData data = cartsRepo.getCartData(id);
         Cart cart = new Cart(data.getId(), cartsRepo);
         if (data.hasDelivery()) {
             cart.addDelivery();
         }
         for (ProductData pd : data.getProducts()) {
-            cart.addProduct(new Product(pd));
+            cart.addProduct(new Product(pd, discountsRepo.getDiscount(pd.getName())));
         }
         return cart;
     }
